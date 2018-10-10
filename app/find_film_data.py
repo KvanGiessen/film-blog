@@ -1,6 +1,4 @@
-from bs4 import BeautifulSoup
-import urllib3
-import json
+from beautifulsoup4 import BeautifulSoup
 import requests
 
 def get_img_src(query):
