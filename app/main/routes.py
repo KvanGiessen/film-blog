@@ -5,10 +5,11 @@ from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 from guess_language import guess_language
 from app import db
-from app.main.forms import EditProfileForm, PostForm, SearchForm, MessageForm
-from app.models import User, Post, Message, Notification
+from app.main.forms import EditProfileForm, PostForm, SearchForm, MessageForm, FilmForm
+from app.models import User, Post, Message, Notification, Film
 from app.translate import translate
 from app.main import bp
+from find_film_data import get_img_src, get_imdb_src
 
 
 @bp.before_app_request
@@ -18,6 +19,8 @@ def before_request():
         db.session.commit()
         g.search_form = SearchForm()
     g.locale = str(get_locale())
+
+
 
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -35,14 +38,31 @@ def index():
         db.session.commit()
         flash(_('Your post is now live!'))
         return redirect(url_for('main.index'))
+    form2 = FilmForm()
+    if form2.validate_on_submit():
+        title = form2.title.data
+        language = ''
+        img_src = get_img_src(title)
+        db_url = get_imdb_src(title)
+        film = Film(title=title, author=current_user,
+                    language=language,
+                    seen=form2.seen.data,
+                    on_netflix=form2.on_netflix.data,
+                    db_url=db_url, img_src=img_src)
+        db.session.add(film)
+        db.session.commit()
+        flash(_('Your film post is now live!'))
+        return redirect(url_for('main.index'))
     page = request.args.get('page', 1, type=int)
     posts = current_user.followed_posts().paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
+    films = current_user.films.order_by(Film.timestamp.desc()).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
     next_url = url_for('main.index', page=posts.next_num) \
         if posts.has_next else None
     prev_url = url_for('main.index', page=posts.prev_num) \
         if posts.has_prev else None
-    return render_template('index.html', title=_('Home'), form=form,
+    return render_template('index.html', title=_('Home'), form2=form2, films=films.items,
                            posts=posts.items, next_url=next_url,
                            prev_url=prev_url)
 
@@ -53,12 +73,14 @@ def explore():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
+    films = Film.query.order_by(Film.timestamp.desc()).paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
     next_url = url_for('main.explore', page=posts.next_num) \
         if posts.has_next else None
     prev_url = url_for('main.explore', page=posts.prev_num) \
         if posts.has_prev else None
     return render_template('index.html', title=_('Explore'),
-                           posts=posts.items, next_url=next_url,
+                           posts=posts.items, films=films.items, next_url=next_url,
                            prev_url=prev_url)
 
 
@@ -69,11 +91,13 @@ def user(username):
     page = request.args.get('page', 1, type=int)
     posts = user.posts.order_by(Post.timestamp.desc()).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
+    films = user.films.order_by(Film.timestamp.desc()).paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
     next_url = url_for('main.user', username=user.username,
                        page=posts.next_num) if posts.has_next else None
     prev_url = url_for('main.user', username=user.username,
                        page=posts.prev_num) if posts.has_prev else None
-    return render_template('user.html', user=user, posts=posts.items,
+    return render_template('user.html', user=user, posts=posts.items, films=films.items,
                            next_url=next_url, prev_url=prev_url)
 
 
@@ -82,6 +106,11 @@ def user(username):
 def user_popup(username):
     user = User.query.filter_by(username=username).first_or_404()
     return render_template('user_popup.html', user=user)
+
+@bp.route('/film/<title>')
+def film(title):
+    film = Film.query.filter_by(title=title).first_or_404()
+    return render_template('film_popup.html', film=film)
 
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])

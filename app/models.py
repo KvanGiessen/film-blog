@@ -94,6 +94,7 @@ class User(UserMixin, PaginatedAPIMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    films = db.relationship('Film', backref='author', lazy='dynamic')
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     token = db.Column(db.String(32), index=True, unique=True)
@@ -250,6 +251,22 @@ class Post(SearchableMixin, db.Model):
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
+class Film(SearchableMixin, db.Model):
+    __searchable__ = ['title']
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    language = db.Column(db.String(5))
+    db_url = db.Column(db.String(250))
+    img_src = db.Column(db.String(250))
+    rating = db.Column(db.Integer)
+    seen = db.Column(db.Boolean)
+    on_netflix = db.Column(db.Boolean)
+
+    def __repr__(self):
+        return '<Film {}>'.format(self.title)
 
 
 class Message(db.Model):
