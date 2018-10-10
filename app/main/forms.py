@@ -1,6 +1,6 @@
 from flask import request
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, BooleanField, RadioField
+from wtforms import StringField, SubmitField, TextAreaField, BooleanField, RadioField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Length
 from flask_babel import _, lazy_gettext as _l
 from app.models import User
@@ -29,7 +29,7 @@ class PostForm(FlaskForm):
 
 class FilmForm(FlaskForm):
     title = TextAreaField(_l('Title'), validators=[DataRequired()])
-    medium = RadioField('', choices=['Film', 'Series'])
+    medium = SelectField(u'Medium', choices=[('film', 'Film'), ('series', 'Series')])
     seen = BooleanField(_l('Already Seen?'))
     on_netflix = BooleanField(_l('On Netflix?'))
     submit = SubmitField(_l('Submit'))
