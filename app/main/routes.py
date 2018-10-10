@@ -9,7 +9,7 @@ from app.main.forms import EditProfileForm, PostForm, SearchForm, MessageForm, F
 from app.models import User, Post, Message, Notification, Film
 from app.translate import translate
 from app.main import bp
-from find_film_data import get_img_src, get_imdb_src
+from app.find_film_data import get_img_src, get_imdb_src
 
 
 @bp.before_app_request
