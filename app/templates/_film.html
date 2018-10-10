@@ -1,0 +1,49 @@
+    <table class="table table-hover">
+        <tr>
+            <td width="70px">
+                <a href="{{ url_for('main.user', username=film.author.username) }}">
+                    <img src="{{ film.author.avatar(70) }}" />
+                </a>
+            </td>
+            <td>
+                {% set user_link %}
+                    <span class="user_popup">
+                        <a href="{{ url_for('main.user', username=film.author.username) }}">
+                            {{ film.author.username }}
+                        </a>
+                    </span>
+                {% endset %}
+                {{ _('%(username)s said %(when)s',
+                    username=user_link, when=moment(film.timestamp).fromNow()) }}
+                <br>
+
+                <span class="imdb_popup">
+                    <a href={{film.db_url}}>{{ film.title }}</a>
+                </span>
+                <br>
+                {% if film.seen %}
+                Already Seen
+                {% else %}
+                Not Yet Seen
+                {% endif %}
+                <br>
+                {% if film.on_netflix %}
+                On Netflix
+                {% else %}
+                Not On Netflix
+                {% endif %}
+
+                <br><br>
+                {% if film.language and film.language != g.locale %}
+                <br>
+                <span id="translation{{ film.id }}">
+                    <a href="javascript:translate(
+                                '#film{{ film.id }}',
+                                '#translation{{ film.id }}',
+                                '{{ film.language }}',
+                                '{{ g.locale }}');">{{ _('Translate') }}</a>
+                </span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
