@@ -3,6 +3,7 @@ import requests
 
 def get_img_src(query):
     url = """https://www.google.com/images?q='%s'""" % query
+    print(url)
     res = requests.get(url)
     res.raise_for_status()
     soup = BeautifulSoup(res.text)
@@ -12,6 +13,7 @@ def get_img_src(query):
 
 def get_imdb_src(query):
     url = """https://www.google.com/search?q='%s imdb'""" % query
+    print(url)
     res = requests.get(url)
     res.raise_for_status()
     soup = BeautifulSoup(res.text)
