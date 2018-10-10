@@ -252,8 +252,8 @@ class Post(SearchableMixin, db.Model):
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
-class Film(SearchableMixin, db.Model):
-    __searchable__ = ['title']
+class Film(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
