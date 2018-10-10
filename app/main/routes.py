@@ -42,6 +42,7 @@ def index():
     if form2.validate_on_submit():
         title = form2.title.data
         language = ''
+        medium = form2.medium.data
         img_src = get_img_src(title)
         db_url = get_imdb_src(title)
         film = Film(title=title, author=current_user,
