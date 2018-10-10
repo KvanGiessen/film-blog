@@ -6,7 +6,7 @@ def get_img_src(query):
     print(url)
     res = requests.get(url)
     res.raise_for_status()
-    soup = BeautifulSoup(res.text)
+    soup = BeautifulSoup(res.text, "html.parser")
     first_img = soup.find('img')
     src = first_img.get('src')
     return src
@@ -16,7 +16,7 @@ def get_imdb_src(query):
     print(url)
     res = requests.get(url)
     res.raise_for_status()
-    soup = BeautifulSoup(res.text)
+    soup = BeautifulSoup(res.text, "html.parser")
     elements = soup.select('.r a')
     src = elements[0].get('href')[7:]
     link = src.split('&')[0]
